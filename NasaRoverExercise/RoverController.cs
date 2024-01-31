@@ -11,18 +11,18 @@ namespace Controller
 {
     internal class RoverController
     {
-        private List<Tuple<Rover, string>> RoverManagementList { get; set; }
+        private List<RoverInstructionSet> RoverManagementList {  get; set; }
         private int Xmax { get; set; }
         private int Ymax { get; set; }
 
         public RoverController() 
         {
-            RoverManagementList = new List<Tuple<Rover, string>>();
+            RoverManagementList = new List<RoverInstructionSet>();
         }
 
         public void IngestInstructions(string instructionFilePath)
         {
-            var inputLines = File.ReadLines(instructionFilePath);
+            var inputLines = File.ReadLines(instructionFilePath).ToList();
 
             // Get the size of the plateau (maximum X and Y) from the first line
             string[] sizeTokens = inputLines.First().Split(' ');
@@ -46,26 +46,46 @@ namespace Controller
             Ymax = Convert.ToInt32(sizeTokens[1]);
         }
 
-        private void GetRoverInstructions(ref IEnumerable<string> inputLines)
+        private void GetRoverInstructions(ref List<string> inputLines)
         {
-            inputLines = inputLines.Skip(1);
-
-            for (int i = 0; i < inputLines.Count(); i+=2)
+            for (int i = 1; i < inputLines.Count(); i+=2)
             {
-                var roverLines = inputLines.Take(2).ToArray();
-                var roverStartConditions = roverLines[0].Split(' ');
-
+                string[] roverStartConditions = inputLines[i].Split(' ');
                 int startingX = Convert.ToInt32(roverStartConditions[0]);
                 int startingY = Convert.ToInt32(roverStartConditions[1]);
                 Cardinal startingDirection = (Cardinal)Convert.ToChar(roverStartConditions[2]);
 
-                RoverManagementList.Add(new Tuple<Rover, string>
+                RoverManagementList.Add(new RoverInstructionSet
                 (
                     new Rover(startingX, startingY, startingDirection),
-                    roverLines[1]
+                    inputLines[i + 1]
                 ));
+            }
+        }
 
-                Console.WriteLine("ADDED NEW ROVER!");
+        public void ExecuteRoverInstructions()
+        {
+            foreach(var roverInstructions in RoverManagementList) 
+            {
+                foreach (Instruction instruction in roverInstructions.Instructions)
+                {
+                    switch (instruction)
+                    {
+                        case Instruction.Move:
+                            roverInstructions.Rover.Move();
+                            break;
+
+                        case Instruction.RotateRight:
+                            roverInstructions.Rover.RotateRight();
+                            break;
+
+                        case Instruction.RotateLeft:
+                            roverInstructions.Rover.RotateLeft();
+                            break;  
+                    }
+                }
+
+                Console.WriteLine(String.Format("{0} {1} {2}", roverInstructions.Rover.Xpos, roverInstructions.Rover.Ypos, roverInstructions.Rover.Direction));
             }
         }
     }

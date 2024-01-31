@@ -47,14 +47,23 @@ namespace NasaRover
 
         public void RotateLeft()
         {
-            CompassIndex--;
-            Direction = Compass[Math.Abs(CompassIndex)];
+            // Ensure the array is circular and index values wrap back around instead of going out-of-bounds
+            if (--CompassIndex < 0)
+            {
+                CompassIndex = Compass.Length + CompassIndex;
+            }
+
+            Direction = Compass[CompassIndex];
         }
 
         public void RotateRight()
         {
-            CompassIndex++;
-            Direction = Compass[Math.Abs(CompassIndex)];
+            // Ensure the array is circular and index values wrap back around instead of going out-of-bounds
+            if (++CompassIndex >= Compass.Length)
+            {
+                CompassIndex = CompassIndex % Compass.Length;
+            }
+            Direction = Compass[CompassIndex];
         }
     }
 }
