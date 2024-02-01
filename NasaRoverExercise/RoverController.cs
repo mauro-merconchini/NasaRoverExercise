@@ -11,13 +11,13 @@ namespace Controller
 {
     internal class RoverController
     {
-        private List<RoverInstructionSet> RoverManagementList {  get; set; }
+        private List<RoverInstructionTuple> RoverManagementList { get; set; }
         private int Xmax { get; set; }
         private int Ymax { get; set; }
 
-        public RoverController() 
+        public RoverController()
         {
-            RoverManagementList = new List<RoverInstructionSet>();
+            RoverManagementList = new List<RoverInstructionTuple>();
         }
 
         public void IngestInstructions(string instructionFilePath)
@@ -28,7 +28,7 @@ namespace Controller
             string[] sizeTokens = inputLines.First().Split(' ');
 
             GetPlateauSize(inputLines.First());
-            GetRoverInstructions(ref inputLines);
+            PrepareRoverManagementList(ref inputLines);
         }
 
         private void GetPlateauSize(string plateauSizeLine)
@@ -36,7 +36,7 @@ namespace Controller
             // Regex pattern of two integers with exactly one whitespace
             string pattern = @"^\d+\s\d+$";
 
-            if (!Regex.IsMatch(plateauSizeLine, pattern)) 
+            if (!Regex.IsMatch(plateauSizeLine, pattern))
             {
                 throw new ArgumentException(String.Format("\"{0}\" does not match the expected plateau size format. It should be two integers separated by a space"), plateauSizeLine);
             }
@@ -46,16 +46,16 @@ namespace Controller
             Ymax = Convert.ToInt32(sizeTokens[1]);
         }
 
-        private void GetRoverInstructions(ref List<string> inputLines)
+        private void PrepareRoverManagementList(ref List<string> inputLines)
         {
-            for (int i = 1; i < inputLines.Count(); i+=2)
+            for (int i = 1; i < inputLines.Count(); i += 2)
             {
                 string[] roverStartConditions = inputLines[i].Split(' ');
                 int startingX = Convert.ToInt32(roverStartConditions[0]);
                 int startingY = Convert.ToInt32(roverStartConditions[1]);
                 Cardinal startingDirection = (Cardinal)Convert.ToChar(roverStartConditions[2]);
 
-                RoverManagementList.Add(new RoverInstructionSet
+                RoverManagementList.Add(new RoverInstructionTuple
                 (
                     new Rover(startingX, startingY, startingDirection),
                     inputLines[i + 1]
@@ -65,27 +65,14 @@ namespace Controller
 
         public void ExecuteRoverInstructions()
         {
-            foreach(var roverInstructions in RoverManagementList) 
+            foreach (var roverManagement in RoverManagementList)
             {
-                foreach (Instruction instruction in roverInstructions.Instructions)
+                foreach (Instruction instruction in roverManagement.Instructions)
                 {
-                    switch (instruction)
-                    {
-                        case Instruction.Move:
-                            roverInstructions.Rover.Move();
-                            break;
-
-                        case Instruction.RotateRight:
-                            roverInstructions.Rover.RotateRight();
-                            break;
-
-                        case Instruction.RotateLeft:
-                            roverInstructions.Rover.RotateLeft();
-                            break;  
-                    }
+                    roverManagement.Rover.ExecuteInstruction(instruction);
                 }
 
-                Console.WriteLine(String.Format("{0} {1} {2}", roverInstructions.Rover.Xpos, roverInstructions.Rover.Ypos, roverInstructions.Rover.Direction));
+                roverManagement.Rover.ReportLocation();
             }
         }
     }
