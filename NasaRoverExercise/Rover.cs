@@ -13,7 +13,7 @@ namespace NasaRover
         public Dictionary<Instruction, Action> InstructionSet { get; }
         private int CompassIndex;
         private readonly Cardinal[] Compass;
-        private readonly Dictionary<Cardinal, (int deltaX, int deltaY)> MovementAxes;
+        private readonly Dictionary<Cardinal, (int DeltaX, int DeltaY)> MovementAxes;
 
         /// <summary>
         /// Creates a new NASA Rover with pre-defined starting conditions.
@@ -38,7 +38,7 @@ namespace NasaRover
             };
 
             // Map all directions to their corresponding change to the X or Y position value
-            MovementAxes = new Dictionary<Cardinal, (int deltaX, int deltaY)>
+            MovementAxes = new Dictionary<Cardinal, (int DeltaX, int DeltaY)>
             {
                 { Cardinal.North, (0, 1) },
                 { Cardinal.South, (0, -1) },
@@ -76,8 +76,8 @@ namespace NasaRover
         /// </summary>
         public void Move()
         {
-            Xpos += MovementAxes[Direction].deltaX;
-            Ypos += MovementAxes[Direction].deltaY;
+            Xpos += MovementAxes[Direction].DeltaX;
+            Ypos += MovementAxes[Direction].DeltaY;
         }
 
         /// <summary>
@@ -86,7 +86,7 @@ namespace NasaRover
         /// <returns>A tuple containing the simulated results.</returns>
         public (int newX, int newY) SimulatedMove()
         {
-            return (Xpos + MovementAxes[Direction].deltaX, Ypos + MovementAxes[Direction].deltaY); 
+            return (Xpos + MovementAxes[Direction].DeltaX, Ypos + MovementAxes[Direction].DeltaY); 
         }
 
         /// <summary>
