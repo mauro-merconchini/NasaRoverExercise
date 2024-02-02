@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using RoverUtils;
+﻿using RoverUtils;
 
 namespace NasaRover
 {
@@ -15,9 +10,9 @@ namespace NasaRover
         public int Xpos { get; set; }
         public int Ypos { get; set; }
         public Cardinal Direction { get; set; }
-        private int CompassIndex { get; set; }
+        public Dictionary<Instruction, Action> InstructionSet { get; }
+        private int CompassIndex;
         private readonly Cardinal[] Compass;
-        private readonly Dictionary<Instruction, Action> InstructionSet;
         private readonly Dictionary<Cardinal, (int deltaX, int deltaY)> MovementAxes;
 
         /// <summary>
@@ -48,7 +43,7 @@ namespace NasaRover
                 { Cardinal.North, (0, 1) },
                 { Cardinal.South, (0, -1) },
                 { Cardinal.East, (1, 0) },
-                { Cardinal.West, (-1, 0) }
+                { Cardinal.West, (-1, 0) },
             };
         }
 
@@ -56,7 +51,7 @@ namespace NasaRover
         /// Execute a single Rover Instruction.
         /// </summary>
         /// <param name="instruction">The Instruction to be executed.</param>
-        /// <exception cref="ArgumentException">Thrown when the Instruction is not part of the Rover's Instruction Set.</exception>
+        /// <exception cref="InvalidInstructionException">Thrown when the Instruction is not part of the Rover's Instruction Set.</exception>
         public void ExecuteInstruction(Instruction instruction)
         {
             if (InstructionSet.ContainsKey(instruction))
@@ -65,7 +60,7 @@ namespace NasaRover
                 return;
             }
 
-            throw new ArgumentException($"\"{instruction}\" is not part of this Rover's Instruction Set!");
+            throw new InvalidInstructionException(instruction);
         }
 
         /// <summary>
@@ -86,11 +81,20 @@ namespace NasaRover
         }
 
         /// <summary>
+        /// Calculate the X and Y values that would result from a Move instruction.
+        /// </summary>
+        /// <returns>A tuple containing the simulated results.</returns>
+        public (int newX, int newY) SimulatedMove()
+        {
+            return (Xpos + MovementAxes[Direction].deltaX, Ypos + MovementAxes[Direction].deltaY); 
+        }
+
+        /// <summary>
         /// Rotate the rover to the left and update its cardinal direction.
         /// </summary>
         public void RotateLeft()
         {
-            // Ensure the array is circular and index values wrap back around instead of going out-of - bounds
+            // Ensure the array is circular and index values wrap back around instead of going out-of-bounds
             if (--CompassIndex < 0)
             {
                 CompassIndex = Compass.Length + CompassIndex;
@@ -104,7 +108,7 @@ namespace NasaRover
         /// </summary>
         public void RotateRight()
         {
-            // Ensure the array is circular and index values wrap back around instead of going out-of - bounds
+            // Ensure the array is circular and index values wrap back around instead of going out-of-bounds
             if (++CompassIndex >= Compass.Length)
             {
                 CompassIndex = CompassIndex % Compass.Length;

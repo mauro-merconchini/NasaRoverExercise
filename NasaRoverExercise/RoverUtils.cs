@@ -1,9 +1,4 @@
 ﻿using NasaRover;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RoverUtils
 {
@@ -29,33 +24,41 @@ namespace RoverUtils
     }
 
     /// <summary>
-    /// Represents the minimum set of shared functionality any rover could have.
+    /// Represents the minimum set of shared functionality any rover should have.
     /// </summary>
     public interface IRover
     {
         public int Xpos { get; set; }
         public int Ypos { get; set; }
+        public Dictionary<Instruction, Action> InstructionSet { get; }
         public void ExecuteInstruction(Instruction instruction);
         public void ReportLocation();
     }
 
     /// <summary>
-    /// Represents a tuple collection of a Rover and its associated instructions.
+    /// Represents an error caused by passing an invalid instruction to a Rover.
     /// </summary>
-    public class RoverInstructionTuple
+    public class InvalidInstructionException : Exception
     {
-        public Rover Rover { get; set; }
-        public string Instructions { get; set; }
+        public InvalidInstructionException(Instruction invalidInstruction) : 
+            base($"\"{(char)invalidInstruction}\" is not part of this Rover's Instruction Set!") {}
+    }
 
-        /// <summary>
-        /// Initializes a new tuple consisting of a Rover and its associated instructions.
-        /// </summary>
-        /// <param name="rover">The Rover to be managed.</param>
-        /// <param name="instructions">The instructions that Rover must exeecute.</param>
-        public RoverInstructionTuple(Rover rover, string instructions) 
-        {
-            Rover = rover;
-            Instructions = instructions;
-        }
+    /// <summary>
+    /// Represents an error caused by two rovers trying to occupy the same coordinate at the same time.
+    /// </summary>
+    public class RoverCollisionException : Exception
+    {
+        public RoverCollisionException((int Xpos, int Ypos) collisionCoordinates) : 
+            base($"Rover Collision avoided at location ({collisionCoordinates.Xpos},{collisionCoordinates.Ypos})") {}
+    }
+
+    /// <summary>
+    /// Represents an error caused by a rover trying to move to out-of-bounds coordinates.
+    /// </summary>
+    public class RoverOutOfBoundsException : Exception
+    {
+        public RoverOutOfBoundsException((int Xpos, int Ypos) outOfBoundsCoordinates) : 
+            base($"Rover attempted to reach out-of-bounds coordinate ({outOfBoundsCoordinates.Xpos},{outOfBoundsCoordinates.Ypos})") {}
     }
 }

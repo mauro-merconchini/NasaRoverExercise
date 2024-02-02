@@ -1,23 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using NasaRover;
 using RoverUtils;
-using NasaRover;
 using System.Text.RegularExpressions;
 
 namespace Controller
 {
     internal class RoverController
     {
-        private List<RoverInstructionTuple> RoverManagementList { get; set; }
+        private List<(Rover Rover, string Instructions)> RoverManagementList { get; set; }
         private int Xmax { get; set; }
         private int Ymax { get; set; }
+        private HashSet<(int XRoverPos, int YRoverPos)> OccupiedCoordinates;
 
         public RoverController()
         {
-            RoverManagementList = new List<RoverInstructionTuple>();
+            RoverManagementList = new List<(Rover Rover, string Instructions)>();
+            OccupiedCoordinates = new HashSet<(int XRoverPos, int YRoverPos)>();
         }
 
         public void IngestInstructions(string instructionFilePath)
@@ -55,11 +52,13 @@ namespace Controller
                 int startingY = Convert.ToInt32(roverStartConditions[1]);
                 Cardinal startingDirection = (Cardinal)Convert.ToChar(roverStartConditions[2]);
 
-                RoverManagementList.Add(new RoverInstructionTuple
-                (
+                RoverManagementList.Add((                
                     new Rover(startingX, startingY, startingDirection),
                     inputLines[i + 1]
                 ));
+
+                // Allocate the space needed for tracking rover coordinates
+                OccupiedCoordinates.Add((startingX, startingY));
             }
         }
 
@@ -69,11 +68,42 @@ namespace Controller
             {
                 foreach (Instruction instruction in roverManagement.Instructions)
                 {
-                    roverManagement.Rover.ExecuteInstruction(instruction);
+                    if (InstructionIsSafe(instruction, roverManagement.Rover))
+                    {
+                        roverManagement.Rover.ExecuteInstruction(instruction);
+                    }
                 }
 
                 roverManagement.Rover.ReportLocation();
             }
+        }
+
+        private bool InstructionIsSafe(Instruction instruction, Rover rover)
+        {
+            if (instruction.Equals(Instruction.Move))
+            {
+                (int simX, int simY) simulatedCoordinates = rover.SimulatedMove();
+
+                // Check that the rover is still within the bounds of the plateau
+                if (simulatedCoordinates.simX > Xmax    || 
+                    simulatedCoordinates.simX < 0       || 
+                    simulatedCoordinates.simY > Ymax    || 
+                    simulatedCoordinates.simY < 0) 
+                {
+                    throw new RoverOutOfBoundsException(simulatedCoordinates);
+                }
+
+                // Check for rover collisions
+                if (OccupiedCoordinates.Contains(simulatedCoordinates))
+                {
+                    throw new RoverCollisionException(simulatedCoordinates);
+                }
+
+                OccupiedCoordinates.Remove((rover.Xpos, rover.Ypos));
+                OccupiedCoordinates.Add(simulatedCoordinates);
+            }
+
+            return true;
         }
     }
 }
