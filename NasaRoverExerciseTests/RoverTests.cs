@@ -60,13 +60,16 @@ namespace NasaRover.Tests
         public void RotateRight_UpdatesDirectionCorrectly()
         {
             // Arrange
-            Rover rover = new Rover(1, 1, Cardinal.North);
+            Rover rover1 = new Rover(1, 1, Cardinal.North);
+            Rover rover2 = new Rover(1, 1, Cardinal.North);
 
             // Act
-            rover.RotateRight();
+            rover1.RotateRight();
+            rover2.RotateLeft();
 
             // Assert
-            Assert.AreEqual(Cardinal.East, rover.Direction);
+            Assert.AreEqual(Cardinal.East, rover1.Direction);
+            Assert.AreEqual(Cardinal.West, rover2.Direction);
         }
 
         [TestMethod]
