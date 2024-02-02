@@ -68,7 +68,7 @@ namespace NasaRover
         /// </summary>
         public void ReportLocation()
         {
-            Console.WriteLine($"{Xpos} {Ypos} {Direction}");
+            Console.WriteLine($"{Xpos} {Ypos} {(char)Direction}");
         }
 
         /// <summary>

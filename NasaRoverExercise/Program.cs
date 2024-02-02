@@ -1,11 +1,16 @@
 ﻿using Controller;
 
-RoverController rc = new RoverController();
-
 try
 {
-    rc.IngestInstructions("D:\\Programming\\.NET\\NasaRoverExercise\\NasaRoverExercise\\input.txt");
+    string projectFolder = AppDomain.CurrentDomain.BaseDirectory;
+    string filePath = Path.Combine(projectFolder, "input.txt");
+    string input = File.ReadAllText(filePath);
+
+    RoverController rc = new RoverController();
+    rc.IngestInput(input);
     rc.ExecuteRoverInstructions();
+
+    Console.ReadKey();
 }
 catch (Exception e)
 {
