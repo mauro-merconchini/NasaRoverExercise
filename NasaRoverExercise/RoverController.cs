@@ -29,11 +29,7 @@ namespace Controller
         /// <param name="input">The contents of the input.txt file.</param>
         public void IngestInput(string input)
         {
-            //var inputLines = File.ReadLines(input).ToList();
-            var inputLines = input.Split(Environment.NewLine);
-
-            // Get the size of the plateau (maximum X and Y) from the first line
-            string[] sizeTokens = inputLines[0].Split(' ');
+            string[] inputLines = input.Split(Environment.NewLine);
 
             GetPlateauSize(inputLines[0]);
             PrepareRoverManagementList(inputLines);
@@ -85,11 +81,11 @@ namespace Controller
         /// <exception cref="ArgumentException">Thrown when invalid data is passed.</exception>
         private void PrepareRoverManagementList(string[] inputLines)
         {
-            // Regex pattern for two numbers and a direction separated by a whitespace
+            // Regex pattern for two numbers and a cardinal direction char separated by whitespace
             string roverStartConditionsPattern = @"^\d+\s\d+\s[NSEW]$";
 
             // Regex pattern for a sequence of capital letters
-            string roverInstructionsPattern = "[A-Z]+";
+            string roverInstructionsPattern = "^[A-Z]+$";
 
             for (int i = 1; i < inputLines.Count(); i += 2)
             {

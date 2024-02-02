@@ -41,7 +41,7 @@ namespace Controller.Tests
             // Arrange
             RoverController roverController = new RoverController();
             string input =
-                "5\r\n" +
+                "\r\n" +
                 "1 2 N\r\n" +
                 "LMLMLMLMM\r\n" +
                 "3 3 E\r\n" +
@@ -81,7 +81,7 @@ namespace Controller.Tests
             string input =
                 "5 5\r\n" +
                 "1 2 N\r\n" +
-                "LMLMLMLM1\r\n" + // Invalid instructions
+                "aLMLMLMLM\r\n" + // Invalid instructions
                 "3 3 E\r\n" +
                 "MMRMMRMRRM";
 
